@@ -1,0 +1,38 @@
+# SPDX-License-Identifier: MIT-0
+---
+# tasks file for actual-budget
+- name: Create Actual Budget directories.
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0700'
+  loop:
+    - "{{ actual_dir }}/data"
+
+- name: Template .env file.
+  ansible.builtin.template:
+    src: .env.j2
+    dest: "{{ actual_dir }}/.env"
+    mode: "0600"
+
+- name: Start Acutal-Budget container.
+  community.docker.docker_container:
+    name: actual-budget
+    image: docker.io/actualbudget/actual-server:latest
+    pull: always
+    state: started
+    restart_policy: unless-stopped
+    env_file: "{{ actual_dir }}/.env"
+    published_ports:
+      - "{{ actual_port }}:5006"
+    volumes:
+      - "{{ actual_dir }}/data:/data"
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - scripts/health-check.js
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 20s

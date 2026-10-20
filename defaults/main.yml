@@ -1,0 +1,5 @@
+# SPDX-License-Identifier: MIT-0
+---
+# defaults file for ansible-role-actual-budget
+actual_dir: /opt/actual
+actual_allowed_login_methods: password,header,openid
